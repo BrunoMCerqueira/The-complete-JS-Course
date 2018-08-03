@@ -1,5 +1,6 @@
 import Search from './models/Search';
 import Recipe from './models/Recipe';
+import List from './models/List';
 import * as searchView from './views/searchView';
 import * as recipeView from './views/recipeView';
 import { elements, renderLoader, clearLoader } from './views/base';
@@ -9,7 +10,7 @@ import { elements, renderLoader, clearLoader } from './views/base';
 
 const state = {};
 
-/**
+/*
 * SEARCH CONTROLLER
 */
 
@@ -69,6 +70,10 @@ const controlRecipe = async () => {
     // Prepare UI for changes
     recipeView.clearRecipe();
     renderLoader(elements.recipe);
+
+    //High selected item
+    if (state.search) searchView.highSelected(id);
+
     // Create new recipe object
     state.recipe = new Recipe(id);
 
@@ -91,3 +96,20 @@ const controlRecipe = async () => {
 }
 
 ['hashchange', 'load'].forEach(event => window.addEventListener(event, controlRecipe));
+
+// Handling recipe button clicks
+elements.recipe.addEventListener('click', e => {
+  if (e.target.matches('.btn-decrease, .btn-decrease *')) {
+    //Decrease server
+    if(state.recipe.servings > 1) {
+      state.recipe.updateServings('dec');
+      recipeView.updateServingsIngredients(state.recipe);
+    }
+  } else if (e.target.matches('.btn-increase, .btn-increase *')) {
+    // Incresase
+    state.recipe.updateServings('inc');
+    recipeView.updateServingsIngredients(state.recipe);
+  }
+});
+
+window.l = new List();
